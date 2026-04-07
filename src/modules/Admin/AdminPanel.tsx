@@ -5,6 +5,7 @@ import {
   RefreshCw, AlertTriangle, Edit3, X, Save, Eye, EyeOff,
   TrendingUp, Clock, DollarSign, UserCheck,
 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import './AdminPanel.css';
 
 /* ── Tipos ─────────────────────────────────────────────── */
@@ -152,7 +153,7 @@ const ModalUsuario: React.FC<{
     }
   };
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-body" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
@@ -265,7 +266,8 @@ const ModalUsuario: React.FC<{
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
