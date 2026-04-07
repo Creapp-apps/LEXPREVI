@@ -17,9 +17,9 @@ const navItems = [
 export const Sidebar: React.FC = () => {
   const { profile, suscripcion, isAdmin, signOut } = useAuth();
 
-  const nombre   = profile?.nombre_completo || profile?.email || 'Usuario';
-  const estudio  = profile?.nombre_estudio  || 'Estudio Jurídico';
-  const initials = nombre.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  const nombre   = isAdmin ? 'Equipo CreApp' : (profile?.nombre_completo || profile?.email || 'Usuario');
+  const estudio  = isAdmin ? 'Super Admin'   : (profile?.nombre_estudio  || 'Estudio Jurídico');
+  const initials = isAdmin ? 'CR' : nombre.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
 
   return (
     <aside className="sidebar">
@@ -52,7 +52,7 @@ export const Sidebar: React.FC = () => {
 
       <div className="sidebar-footer">
         {/* Badge de plan/suscripción */}
-        {suscripcion && (
+        {suscripcion && !isAdmin && (
           <div className="plan-badge-sidebar">
             <span className={`plan-dot ${suscripcion.estado}`} />
             <span>{suscripcion.plan_nombre}</span>
