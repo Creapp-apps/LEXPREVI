@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabaseClientesService } from '../../services/supabaseClientesService';
+import { useAuth } from '../../contexts/AuthContext';
 import {
-  getClientes, addCliente, updateCliente, deleteCliente,
-  cambiarEstado, addDocumento, removeDocumento,
   ESTADO_CONFIG, TIPO_CALCULO_CONFIG, formatCurrency, formatFechaHs,
   getTipoDocumento, getDocIcono, formatBytes,
   type Cliente, type EstadoExpediente, type DocumentoExpediente,
@@ -22,7 +22,7 @@ type TabDetalle = 'expediente' | 'docs' | 'historial' | 'calculos';
    Tarjeta de cliente en la lista
 ───────────────────────────────────────────────────────── */
 const ClienteCard: React.FC<{ c: Cliente; onClick: () => void; onDelete: () => void }> = ({ c, onClick, onDelete }) => {
-  const est = ESTADO_CONFIG[c.estado];
+  const est = ESTADO_CONFIG[c.estado] || ESTADO_CONFIG['activo'];
   const [menu, setMenu] = useState(false);
   return (
     <div className="cliente-card" onClick={onClick}>
@@ -30,13 +30,13 @@ const ClienteCard: React.FC<{ c: Cliente; onClick: () => void; onDelete: () => v
         <div className="cc-avatar">{c.apellidoNombre.split(',')[0].trim().slice(0, 2).toUpperCase()}</div>
         <div className="cc-info">
           <strong className="cc-nombre">{c.apellidoNombre}</strong>
-          <span className="cc-cuil">CUIL {c.cuil}</span>
+          {c.cuil && <span className="cc-cuil">CUIL {c.cuil}</span>}
           {c.nroExpediente && <span className="cc-exp">{c.nroExpediente}</span>}
         </div>
       </div>
       <div className="cc-right">
         <span className="estado-pill" style={{ background: est.bg, color: est.color }}>{est.label}</span>
-        <span className="cc-casos">{c.documentos.length} doc · {c.casos.length} cálc</span>
+        <span className="cc-casos">{(c.documentos||[]).length} doc · {(c.casos||[]).length} cálc</span>
         <button className="btn-menu" onClick={e => { e.stopPropagation(); setMenu(p => !p); }}>
           <MoreVertical size={16} />
         </button>
@@ -56,23 +56,38 @@ const ClienteCard: React.FC<{ c: Cliente; onClick: () => void; onDelete: () => v
    Sección cambio de estado + timeline
 ───────────────────────────────────────────────────────── */
 const TabHistorial: React.FC<{ cliente: Cliente; onUpdate: () => void }> = ({ cliente, onUpdate }) => {
+  const { user, profile } = useAuth();
   const [nuevoEstado, setNuevoEstado] = useState<EstadoExpediente>(cliente.estado);
   const [notas, setNotas]             = useState('');
   const [error, setError]             = useState('');
+  const [loading, setLoading]         = useState(false);
 
-  const handleCambiar = () => {
+  const handleCambiar = async () => {
     if (!notas.trim()) { setError('Ingresá una nota para el cambio de estado.'); return; }
-    cambiarEstado(cliente.id, nuevoEstado, notas.trim());
-    setNotas('');
-    setError('');
-    onUpdate();
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      await supabaseClientesService.cambiarEstado(user.id, cliente.id, {
+        estadoActual: cliente.estado,
+        nuevoEstado,
+        notas: notas.trim(),
+        autor: profile?.nombre_completo || profile?.email || 'Usuario'
+      });
+      setNotas('');
+      setError('');
+      onUpdate();
+    } catch (e: any) {
+      setError(e?.message || 'Error al cambiar estado.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const historial = [...cliente.historialEstados].reverse();
+  const historial = [...(cliente.historialEstados || [])].reverse();
 
   return (
     <div className="tab-historial">
-      {/* Panel de cambio de estado */}
       <div className="card cambio-estado-panel">
         <div className="card-header"><h3>Cambiar Estado del Expediente</h3></div>
         <div className="card-body">
@@ -96,8 +111,8 @@ const TabHistorial: React.FC<{ cliente: Cliente; onUpdate: () => void }> = ({ cl
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.75rem' }}>
             <button className="btn-primary flex-center gap-2" onClick={handleCambiar}
-              disabled={nuevoEstado === cliente.estado}>
-              <RefreshCw size={15} /> Registrar Cambio de Estado
+              disabled={nuevoEstado === cliente.estado || loading}>
+              {loading ? <span className="upload-spinner" /> : <RefreshCw size={15} />} Registrar Cambio de Estado
             </button>
           </div>
           {nuevoEstado === cliente.estado && (
@@ -108,12 +123,11 @@ const TabHistorial: React.FC<{ cliente: Cliente; onUpdate: () => void }> = ({ cl
         </div>
       </div>
 
-      {/* Timeline de historial */}
       <div className="timeline">
         <h3 className="timeline-title">Historia Clínica del Expediente</h3>
         {historial.map((entry, i) => {
-          const estNuevo = ESTADO_CONFIG[entry.estadoNuevo];
-          const estAnterior = ESTADO_CONFIG[entry.estadoAnterior];
+          const estNuevo = ESTADO_CONFIG[entry.estadoNuevo] || ESTADO_CONFIG['activo'];
+          const estAnterior = ESTADO_CONFIG[entry.estadoAnterior] || ESTADO_CONFIG['activo'];
           const esAlta = entry.estadoAnterior === entry.estadoNuevo;
           return (
             <div key={entry.id} className={`timeline-entry ${i === 0 ? 'latest' : ''}`}>
@@ -148,79 +162,78 @@ const TabHistorial: React.FC<{ cliente: Cliente; onUpdate: () => void }> = ({ cl
    Sección de documentos
 ───────────────────────────────────────────────────────── */
 const TabDocumentos: React.FC<{ cliente: Cliente; onUpdate: () => void }> = ({ cliente, onUpdate }) => {
+  const { user } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
   const [descripcion, setDescripcion] = useState('');
   const [subiendo, setSubiendo]       = useState(false);
   const [error, setError]             = useState('');
-  const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
+  const MAX_SIZE = 5 * 1024 * 1024; // 5 MB for Supabase Storage
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !user) return;
     if (file.size > MAX_SIZE) {
-      setError(`El archivo supera el límite de 2 MB (${formatBytes(file.size)}). Comprimí el archivo antes de subirlo.`);
+      setError(`El archivo supera el límite de 5 MB (${formatBytes(file.size)}). Comprimilo antes de subirlo.`);
       return;
     }
     setSubiendo(true);
     setError('');
+    
     try {
-      const dataUrl = await new Promise<string>((res, rej) => {
-        const reader = new FileReader();
-        reader.onload = () => res(reader.result as string);
-        reader.onerror = rej;
-        reader.readAsDataURL(file);
-      });
-      addDocumento(cliente.id, {
-        nombre: file.name,
+      await supabaseClientesService.addDocumento(user.id, cliente.id, file, {
         tipo: getTipoDocumento(file.name),
-        tamano: file.size,
-        descripcion: descripcion.trim() || undefined,
-        dataUrl,
+        descripcion: descripcion.trim() || undefined
       });
       setDescripcion('');
       e.target.value = '';
       onUpdate();
-    } catch {
-      setError('Error al leer el archivo. Intentá nuevamente.');
+    } catch (err: any) {
+      setError('Error al subir el archivo: ' + (err?.message || 'Reintentá más tarde.'));
     } finally {
       setSubiendo(false);
     }
   };
 
-  const handleDelete = (docId: string) => {
-    if (!confirm('¿Eliminar este documento del expediente?')) return;
-    removeDocumento(cliente.id, docId);
-    onUpdate();
+  const handleDelete = async (doc: DocumentoExpediente) => {
+    if (!user || !confirm('¿Eliminar este documento permanentemente?')) return;
+    try {
+      await supabaseClientesService.removeDocumento(user.id, doc as any);
+      onUpdate();
+    } catch {
+      setError('Error al eliminar el documento.');
+    }
   };
 
   const handleDownload = (doc: DocumentoExpediente) => {
-    if (!doc.dataUrl) return;
-    const a = document.createElement('a');
-    a.href = doc.dataUrl;
-    a.download = doc.nombre;
-    a.click();
+    if (doc.url) {
+      window.open(doc.url, '_blank');
+    } else if (doc.dataUrl) {
+      const a = document.createElement('a');
+      a.href = doc.dataUrl;
+      a.download = doc.nombre;
+      a.click();
+    }
   };
 
   return (
     <div className="tab-documentos">
-      {/* Zona de carga */}
-      <div className="upload-zone card" onClick={() => inputRef.current?.click()}>
+      <div className="upload-zone card" onClick={() => inputRef.current?.click()} style={{ position: 'relative' }}>
         <input ref={inputRef} type="file" style={{ display: 'none' }}
           accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg,.webp,.csv"
-          onChange={handleFile} />
-        <Upload size={32} color="var(--brand-primary)" />
+          onChange={handleFile} disabled={subiendo} />
+        <Upload size={32} color={subiendo ? "var(--text-muted)" : "var(--brand-primary)"} />
         <div className="uz-text">
-          <strong>Clic para subir un documento</strong>
-          <span>PDF, Word, Excel, imágenes · Máx. 2 MB</span>
+          <strong>{subiendo ? 'Subiendo documento a la nube...' : 'Clic para subir un documento'}</strong>
+          <span>PDF, Word, Excel, imágenes · Máx. 5 MB</span>
         </div>
-        {subiendo && <div className="upload-spinner" />}
+        {subiendo && <div className="upload-spinner" style={{ position: 'absolute', right: '1.5rem' }} />}
       </div>
 
       <div className="upload-meta">
         <div className="form-group" style={{ flex: 1 }}>
-          <label>Descripción del documento (opcional)</label>
+          <label>Descripción del documento (opcional antes de subir)</label>
           <input className="form-control no-icon" value={descripcion}
-            onChange={e => setDescripcion(e.target.value)}
+            onChange={e => setDescripcion(e.target.value)} disabled={subiendo}
             placeholder="Ej: Demanda inicial, Sentencia de primera instancia..." />
         </div>
       </div>
@@ -232,8 +245,7 @@ const TabDocumentos: React.FC<{ cliente: Cliente; onUpdate: () => void }> = ({ c
         </div>
       )}
 
-      {/* Lista de documentos */}
-      {cliente.documentos.length === 0 ? (
+      {!(cliente.documentos && cliente.documentos.length > 0) ? (
         <div className="doc-empty">
           <Files size={40} color="var(--text-muted)" />
           <p>Sin documentos en el expediente. Subí el primero haciendo clic arriba.</p>
@@ -249,12 +261,12 @@ const TabDocumentos: React.FC<{ cliente: Cliente; onUpdate: () => void }> = ({ c
                 <span className="doc-meta">{formatBytes(doc.tamano)} · {doc.fechaCarga}</span>
               </div>
               <div className="doc-actions">
-                {doc.dataUrl && (
-                  <button className="btn-doc-action" title="Descargar" onClick={() => handleDownload(doc)}>
+                {(doc.url || doc.dataUrl) && (
+                  <button className="btn-doc-action" title="Abrir / Descargar" onClick={() => handleDownload(doc)}>
                     <Download size={15} />
                   </button>
                 )}
-                <button className="btn-doc-action danger" title="Eliminar" onClick={() => handleDelete(doc.id)}>
+                <button className="btn-doc-action danger" title="Eliminar" onClick={() => handleDelete(doc)}>
                   <Trash2 size={15} />
                 </button>
               </div>
@@ -269,25 +281,16 @@ const TabDocumentos: React.FC<{ cliente: Cliente; onUpdate: () => void }> = ({ c
 /* ─────────────────────────────────────────────────────────
    Vista de Detalle
 ───────────────────────────────────────────────────────── */
-const DetalleCliente: React.FC<{ clienteId: string; onBack: () => void; onEdit: (c: Cliente) => void }> = ({ clienteId, onBack, onEdit }) => {
+const DetalleCliente: React.FC<{ cliente: Cliente; onBack: () => void; onEdit: (c: Cliente) => void; onRefresh: () => void }> = ({ cliente, onBack, onEdit, onRefresh }) => {
   const navigate = useNavigate();
   const [tab, setTab]         = useState<TabDetalle>('expediente');
-  const [cliente, setCliente] = useState<Cliente | null>(null);
 
-  const refresh = () => {
-    const fresh = getClientes().find(c => c.id === clienteId);
-    if (fresh) setCliente(fresh);
-  };
-
-  useEffect(() => { refresh(); }, [clienteId]);
-  if (!cliente) return null;
-
-  const est = ESTADO_CONFIG[cliente.estado];
+  const est = ESTADO_CONFIG[cliente.estado] || ESTADO_CONFIG['activo'];
   const TABS: { id: TabDetalle; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'expediente', label: 'Expediente',    icon: <FileText size={15} /> },
-    { id: 'docs',       label: 'Documentos',    icon: <Files size={15} />,    badge: cliente.documentos.length },
-    { id: 'historial',  label: 'Historial',     icon: <History size={15} />,  badge: cliente.historialEstados.length },
-    { id: 'calculos',   label: 'Cálculos',      icon: <Calculator size={15} />, badge: cliente.casos.length },
+    { id: 'docs',       label: 'Documentos',    icon: <Files size={15} />,    badge: (cliente.documentos||[]).length },
+    { id: 'historial',  label: 'Historial',     icon: <History size={15} />,  badge: (cliente.historialEstados||[]).length },
+    { id: 'calculos',   label: 'Cálculos',      icon: <Calculator size={15} />, badge: (cliente.casos||[]).length },
   ];
 
   return (
@@ -302,13 +305,12 @@ const DetalleCliente: React.FC<{ clienteId: string; onBack: () => void; onEdit: 
         </div>
       </div>
 
-      {/* Hero */}
       <div className="detalle-hero-bar">
         <div className="detalle-avatar-lg">{cliente.apellidoNombre.split(',')[0].trim().slice(0, 2).toUpperCase()}</div>
         <div className="detalle-hero-info">
           <h2>{cliente.apellidoNombre}</h2>
           <div className="hero-chips">
-            <span>CUIL: <strong>{cliente.cuil}</strong></span>
+            {cliente.cuil && <span>CUIL: <strong>{cliente.cuil}</strong></span>}
             {cliente.dni && <span>DNI: <strong>{cliente.dni}</strong></span>}
             {cliente.nroExpediente && <span className="chip-exp">{cliente.nroExpediente}</span>}
           </div>
@@ -321,7 +323,6 @@ const DetalleCliente: React.FC<{ clienteId: string; onBack: () => void; onEdit: 
         </div>
       </div>
 
-      {/* Tabs */}
       <nav className="tabs-nav" style={{ marginTop: '1.5rem' }}>
         {TABS.map(t => (
           <button key={t.id} className={`tab-btn ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
@@ -357,20 +358,20 @@ const DetalleCliente: React.FC<{ clienteId: string; onBack: () => void; onEdit: 
           </div>
         )}
 
-        {tab === 'docs' && <TabDocumentos cliente={cliente} onUpdate={refresh} />}
-        {tab === 'historial' && <TabHistorial cliente={cliente} onUpdate={refresh} />}
+        {tab === 'docs' && <TabDocumentos cliente={cliente} onUpdate={onRefresh} />}
+        {tab === 'historial' && <TabHistorial cliente={cliente} onUpdate={onRefresh} />}
 
         {tab === 'calculos' && (
           <div>
-            {cliente.casos.length === 0
+            {!(cliente.casos && cliente.casos.length > 0)
               ? <p className="empty-text" style={{ padding: '2rem', textAlign: 'center' }}>Sin cálculos vinculados.</p>
               : cliente.casos.map(caso => {
                 const tc = TIPO_CALCULO_CONFIG[caso.tipo];
                 return (
                   <div key={caso.id} className="caso-item card" style={{ marginBottom: '0.625rem' }}>
-                    <span className="caso-icon">{tc.icon}</span>
+                    <span className="caso-icon">{tc?.icon || '🧮'}</span>
                     <div className="caso-info">
-                      <strong>{tc.label} {caso.fallo ? `— Fallo ${caso.fallo}` : ''}</strong>
+                      <strong>{tc?.label || caso.tipo} {caso.fallo ? `— Fallo ${caso.fallo}` : ''}</strong>
                       <span>{caso.descripcion}</span>
                       <span className="caso-fecha">{caso.fechaCalculo}</span>
                     </div>
@@ -390,9 +391,10 @@ const DetalleCliente: React.FC<{ clienteId: string; onBack: () => void; onEdit: 
 ───────────────────────────────────────────────────────── */
 const FormCliente: React.FC<{
   inicial?: Partial<Cliente>;
-  onSave: (data: Omit<Cliente, 'id' | 'fechaAlta' | 'casos' | 'documentos' | 'historialEstados'>) => void;
+  onSave: (data: Omit<Cliente, 'id' | 'fechaAlta' | 'casos' | 'documentos' | 'historialEstados'>) => Promise<void>;
   onCancel: () => void;
 }> = ({ inicial, onSave, onCancel }) => {
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     apellidoNombre: inicial?.apellidoNombre ?? '',
     cuil: inicial?.cuil ?? '',
@@ -408,17 +410,27 @@ const FormCliente: React.FC<{
   });
   const set = (k: keyof typeof form, v: string) => setForm(p => ({ ...p, [k]: v }));
 
+  const handleSubmit = async () => {
+    if (!form.apellidoNombre) return;
+    setLoading(true);
+    try {
+      await onSave(form as any);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="form-cliente card animate-fade-in">
       <div className="card-header">
         <h2>{inicial?.id ? 'Editar Cliente' : 'Nuevo Cliente'}</h2>
-        <button className="btn-icon" onClick={onCancel}><X size={18} /></button>
+        <button className="btn-icon" onClick={onCancel} disabled={loading}><X size={18} /></button>
       </div>
       <div className="card-body">
         <div className="form-grid">
           <div className="form-group col-span-2">
             <label>Apellido y Nombre *</label>
-            <input className="form-control no-icon" value={form.apellidoNombre} onChange={e => set('apellidoNombre', e.target.value)} placeholder="García, Marta Susana" />
+            <input className="form-control no-icon" value={form.apellidoNombre} onChange={e => set('apellidoNombre', e.target.value)} placeholder="García, Marta Susana" required />
           </div>
           <div className="form-group">
             <label>CUIL</label>
@@ -456,21 +468,23 @@ const FormCliente: React.FC<{
             <label>Juzgado / Tribunal</label>
             <input className="form-control no-icon" value={form.juzgado} onChange={e => set('juzgado', e.target.value)} />
           </div>
-          <div className="form-group">
-            <label>Estado del Expediente</label>
-            <select className="form-control no-icon" value={form.estado} onChange={e => set('estado', e.target.value)}>
-              {ESTADOS.map(e => <option key={e} value={e}>{ESTADO_CONFIG[e].label}</option>)}
-            </select>
-          </div>
+          {!inicial?.id && (
+            <div className="form-group">
+              <label>Estado Inicial del Expediente</label>
+              <select className="form-control no-icon" value={form.estado} onChange={e => set('estado', e.target.value)}>
+                {ESTADOS.map(e => <option key={e} value={e}>{ESTADO_CONFIG[e].label}</option>)}
+              </select>
+            </div>
+          )}
           <div className="form-group col-span-2">
             <label>Notas Internas</label>
             <textarea className="form-control no-icon textarea-notes" rows={3} value={form.notas} onChange={e => set('notas', e.target.value)} />
           </div>
         </div>
         <div className="form-actions">
-          <button className="btn-secondary" onClick={onCancel}>Cancelar</button>
-          <button className="btn-primary flex-center gap-2" onClick={() => onSave(form as any)}>
-            <Save size={16} /> Guardar
+          <button className="btn-secondary" onClick={onCancel} disabled={loading}>Cancelar</button>
+          <button className="btn-primary flex-center gap-2" onClick={handleSubmit} disabled={loading || !form.apellidoNombre}>
+            {loading ? <span className="upload-spinner" /> : <Save size={16} />} Guardar
           </button>
         </div>
       </div>
@@ -482,40 +496,60 @@ const FormCliente: React.FC<{
    Componente principal
 ───────────────────────────────────────────────────────── */
 export const GestionClientes: React.FC = () => {
+  const { user } = useAuth();
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [loading, setLoading]   = useState(true);
   const [vista, setVista]       = useState<'lista' | 'detalle' | 'formulario'>('lista');
   const [selectedId, setSelId]  = useState<string | null>(null);
   const [editando, setEditando] = useState<Cliente | null>(null);
   const [busqueda, setBusqueda] = useState('');
   const [filtroEstado, setFiltroEstado] = useState<EstadoExpediente | 'todos'>('todos');
 
-  const load = () => setClientes(getClientes());
-  useEffect(() => { load(); }, []);
+  const load = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const data = await supabaseClientesService.getClientes(user.id);
+      setClientes(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, [user]);
 
   const filtrados = useMemo(() => clientes.filter(c => {
     const q = busqueda.toLowerCase();
     const match = c.apellidoNombre.toLowerCase().includes(q)
-      || c.cuil.includes(q)
+      || (c.cuil||'').includes(q)
       || (c.nroExpediente ?? '').toLowerCase().includes(q);
     const est = filtroEstado === 'todos' || c.estado === filtroEstado;
     return match && est;
   }), [clientes, busqueda, filtroEstado]);
 
-  const handleSave = (data: any) => {
+  const handleSave = async (data: any) => {
+    if (!user) return;
     if (editando) {
-      updateCliente(editando.id, data);
+      await supabaseClientesService.updateCliente(user.id, editando.id, data);
     } else {
-      addCliente(data);
+      await supabaseClientesService.addCliente(user.id, data);
     }
-    load();
+    await load();
     setVista('lista');
     setEditando(null);
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm('¿Eliminar este cliente permanentemente?')) return;
-    deleteCliente(id);
-    load();
+  const handleDelete = async (id: string) => {
+    if (!user || !confirm('¿Eliminar este expediente y todos sus documentos permanentemente?')) return;
+    try {
+      await supabaseClientesService.deleteCliente(user.id, id);
+      await load();
+      if (selectedId === id) { setVista('lista'); setSelId(null); }
+    } catch (e) {
+      alert('Error eliminando el cliente.');
+    }
   };
 
   const stats = useMemo(() => ({
@@ -525,6 +559,10 @@ export const GestionClientes: React.FC = () => {
     liquidacion: clientes.filter(c => c.estado === 'liquidacion').length,
     cobrado:     clientes.filter(c => c.estado === 'cobrado').length,
   }), [clientes]);
+
+  if (loading) {
+    return <div className="clientes-view animate-fade-in flex-center" style={{ minHeight: '60vh', color: 'var(--text-muted)' }}><span className="upload-spinner" style={{ width: 30, height: 30, borderWidth: 3 }}/></div>;
+  }
 
   if (vista === 'formulario') {
     return (
@@ -542,12 +580,15 @@ export const GestionClientes: React.FC = () => {
   }
 
   if (vista === 'detalle' && selectedId) {
+    const clienteEncontrado = clientes.find(c => c.id === selectedId);
+    if (!clienteEncontrado) return null; // Shouldn't happen realistically
     return (
       <div className="clientes-view">
         <DetalleCliente
-          clienteId={selectedId}
+          cliente={clienteEncontrado}
           onBack={() => { setVista('lista'); setSelId(null); }}
           onEdit={(c) => { setEditando(c); setVista('formulario'); }}
+          onRefresh={load}
         />
       </div>
     );

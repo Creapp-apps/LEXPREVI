@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { supabaseConfigService } from '../../services/supabaseConfigService';
+import { useAuth } from '../../contexts/AuthContext';
 import {
-  getConfig, saveConfig, resetConfig,
   type AppConfig, type ConfigEstudio, type ConfigValores, type ConfigPreferencias,
-} from '../../utils/configStore';
+} from '../../utils/configStore'; // just importing the types
 import {
   Building2, DollarSign, Palette, Bell, Save, RotateCcw,
-  CheckCircle2, Info, Scale, ChevronRight, Moon, Sun, Monitor,
+  CheckCircle2, Info, Scale, ChevronRight, Moon, Sun, Monitor, AlertCircle
 } from 'lucide-react';
 import './Configuracion.css';
 
@@ -30,19 +31,45 @@ const TASAS_LABELS: Record<string, string> = {
   afip_punitorio:     'Tasa AFIP Punitoria',
 };
 
+const EMPTY_CONFIG = {
+  estudio: { nombreEstudio: '', responsable: '', cuit: '', matricula: '', direccion: '', ciudad: '', telefono: '', email: '' },
+  valores: { pbu: 0, haberMaximo: 0, tasaDefecto: 'pasiva_bcra', porcentajeObraSocial: 3, inscriptoGanancias: false, alicuotaGanancias: 15 },
+  preferencias: { tema: 'system' as any, monedaDecimales: 2, mostrarTooltips: true, recordatoriosActivos: true, formatoPeriodo: 'YYYY-MM' as any }
+};
+
 export const Configuracion: React.FC = () => {
-  const [config, setConfig] = useState<AppConfig>(getConfig);
+  const { user } = useAuth();
+  const [config, setConfig] = useState<AppConfig>(EMPTY_CONFIG);
   const [seccion, setSeccion] = useState<SeccionId>('estudio');
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving]   = useState(false);
+  const [error, setError]     = useState('');
+
+  const loadConfig = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const data = await supabaseConfigService.getConfig(user.id);
+      setConfig(data);
+    } catch (err) {
+      setError('Error al cargar la configuración.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadConfig(); }, [user]);
 
   // Aplica el tema al body cuando cambia
   useEffect(() => {
+    if (loading) return;
     const tema = config.preferencias.tema;
     const root = document.documentElement;
     if (tema === 'dark')  root.setAttribute('data-theme', 'dark');
     else if (tema === 'light') root.setAttribute('data-theme', 'light');
     else root.removeAttribute('data-theme');
-  }, [config.preferencias.tema]);
+  }, [config.preferencias.tema, loading]);
 
   const setEstudio = (k: keyof ConfigEstudio, v: string) =>
     setConfig(p => ({ ...p, estudio: { ...p.estudio, [k]: v } }));
@@ -53,17 +80,29 @@ export const Configuracion: React.FC = () => {
   const setPref = (k: keyof ConfigPreferencias, v: string | number | boolean) =>
     setConfig(p => ({ ...p, preferencias: { ...p.preferencias, [k]: v } }));
 
-  const handleSave = () => {
-    saveConfig(config);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    setError('');
+    try {
+      await supabaseConfigService.saveConfig(user.id, config);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e: any) {
+      setError(e.message || 'Error al guardar la configuración.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleReset = () => {
-    if (!confirm('¿Restablecer la configuración a los valores por defecto?')) return;
-    resetConfig();
-    setConfig(getConfig());
+    if (!confirm('¿Restablecer y recargar la configuración desde la nube? No guardará tus cambios recientes.')) return;
+    loadConfig();
   };
+
+  if (loading) {
+    return <div className="config-view animate-fade-in flex-center" style={{ minHeight: '60vh' }}><span className="upload-spinner" style={{ width: 30, height: 30, borderWidth: 3 }}/></div>;
+  }
 
   return (
     <div className="config-view animate-fade-in">
@@ -73,15 +112,21 @@ export const Configuracion: React.FC = () => {
           <p className="page-subtitle">Personalización del estudio y parámetros de cálculo</p>
         </div>
         <div className="header-actions">
-          <button className="btn-secondary flex-center gap-2" onClick={handleReset}>
-            <RotateCcw size={15} /> Restablecer
+          <button className="btn-secondary flex-center gap-2" onClick={handleReset} disabled={saving}>
+            <RotateCcw size={15} /> Recargar
           </button>
-          <button className={`btn-primary flex-center gap-2 ${saved ? 'btn-saved' : ''}`} onClick={handleSave}>
-            {saved ? <CheckCircle2 size={16} /> : <Save size={16} />}
+          <button className={`btn-primary flex-center gap-2 ${saved ? 'btn-saved' : ''}`} onClick={handleSave} disabled={saving}>
+            {saving ? <span className="upload-spinner" /> : saved ? <CheckCircle2 size={16} /> : <Save size={16} />}
             {saved ? '¡Guardado!' : 'Guardar Cambios'}
           </button>
         </div>
       </header>
+
+      {error && (
+        <div className="info-box danger" style={{ marginBottom: '1.5rem' }}>
+          <AlertCircle size={14} style={{ flexShrink: 0 }} /> <span>{error}</span>
+        </div>
+      )}
 
       <div className="config-layout">
         {/* Menú lateral de secciones */}
@@ -101,8 +146,8 @@ export const Configuracion: React.FC = () => {
           {/* Información de versión */}
           <div className="version-info">
             <div className="version-logo">⚖️ LexPrevi</div>
-            <div className="version-tag">v1.0.0 — Abril 2024</div>
-            <div className="version-desc">Plataforma Previsional Premium</div>
+            <div className="version-tag">SaaS Edition — Abril 2026</div>
+            <div className="version-desc">Plataforma Previsional Cloud</div>
           </div>
         </nav>
 
@@ -195,7 +240,7 @@ export const Configuracion: React.FC = () => {
               <div className="card-body">
                 <div className="info-box info" style={{ marginBottom: '1.5rem' }}>
                   <Info size={14} style={{ flexShrink: 0 }} />
-                  <span>Estos valores se usan como predeterminados en todos los cálculos. Actualizalos cuando ANSES publique nuevos valores.</span>
+                  <span>Estos valores se usan como predeterminados en todos los cálculos. Mantenelos actualizados con la normativa vigente.</span>
                 </div>
                 <div className="form-grid">
                   <div className="form-group">
@@ -259,7 +304,7 @@ export const Configuracion: React.FC = () => {
                   </div>
                   <div className="vs-item">
                     <span className="vs-label">Tasa</span>
-                    <span className="vs-value">{TASAS_LABELS[config.valores.tasaDefecto]}</span>
+                    <span className="vs-value">{TASAS_LABELS[config.valores.tasaDefecto] || 'N/A'}</span>
                   </div>
                   <div className="vs-item">
                     <span className="vs-label">Obra Social</span>
@@ -310,22 +355,8 @@ export const Configuracion: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Decimales de moneda */}
-                <div className="pref-group">
-                  <div className="pref-group-label">Decimales en Montos</div>
-                  <div className="dec-selector">
-                    {[0, 2].map(d => (
-                      <button key={d}
-                        className={`dec-btn ${config.preferencias.monedaDecimales === d ? 'active' : ''}`}
-                        onClick={() => setPref('monedaDecimales', d)}>
-                        {d === 0 ? '$ 1.234.567' : '$ 1.234.567,89'}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Toggles */}
-                <div className="pref-toggles">
+                <div className="pref-toggles" style={{ marginTop: '2rem' }}>
                   <div className="toggle-row pref-toggle-row">
                     <div>
                       <div className="toggle-title">Mostrar Tooltips de Ayuda</div>

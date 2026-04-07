@@ -1,31 +1,44 @@
-# LexPrevi - Plataforma Previsional Premium
+# LexPrevi - Plataforma Previsional Premium (SaaS Multi-tenant)
 ## Contexto de Desarrollo y Arquitectura
 
 Este documento preserva todo el contexto del desarrollo realizado para LexPrevi hasta abril de 2026, para ser utilizado en futuras sesiones o mantenimientos.
 
 ### 1. Visión General del Proyecto
-LexPrevi es una plataforma SaaS previsional diseñada para abogados en Argentina. Su objetivo es calcular haberes iniciales, movilidades, reajustes por fallos jurisprudenciales y liquidaciones de retroactivos de forma precisa, visual y "Premium". Todo el sistema se ejecuta del lado del cliente (Vite + React + TypeScript) con persistencia local por el momento.
+LexPrevi evolucionó de una app local a **plataforma SaaS multi-tenant** previsional diseñada para abogados en Argentina.
+El sistema permite a estudios jurídicos tener cuentas independientes, gestionar pagos, y administrar expedientes con seguridad perimetral total (RLS).
 
 **Stack Tecnológico:**
 *   **Vite + React (TypeScript):** Componentización y tipado fuerte.
-*   **CSS Puro (Custom Properties):** Diseño Premium, dark/light mode mediante `data-theme`, variables de CSS.
-*   **Lucide React:** Iconografía.
-*   **Recharts:** Gráficos comparativos (barras apiladas, líneas).
-*   **Persistencia:** `localStorage` (Clientes, Configuración).
+*   **CSS Puro (Custom Properties):** Diseño Premium, dark/light mode mediante `data-theme`.
+*   **Supabase (PostgreSQL + Auth + Storage):** Autenticación, Base de datos relacional y guardado de archivos.
 
-### 2. Módulos Implementados (Completados 100%)
+### 2. Capa de Autenticación y Multi-tenant (Supabase)
+Todo el sistema está protegido y segmentado:
+*   **Perfiles (`profiles`):** Cada usuario registrado tiene un perfil con un rol (`admin` o `abogado`).
+*   **Planes y Suscripciones (`planes`, `suscripciones`):** Existen planes (`STARTER`, `ENTERPRISE`) y estados de suscripción (`trial`, `activo`, `vencido`, `suspendido`).
+*   **Row Level Security (RLS):** Cada consulta a Supabase (clientes, documentos, cálculos, historial) está filtrada automáticamente a nivel de base de datos (`user_id = auth.uid()`). A nivel de código, las queries simplemente hacen `select('*')` y Supabase devuelve solo lo que le pertenece a ese usuario.
 
-1.  **Dashboard (`/`):** Vista general.
-2.  **Haber Inicial (`/haber-inicial`):** Cálculo del primer haber.
-3.  **Movilidad Reciente (`/movilidad`):** Cálculo de actualización de haberes.
-4.  **Comparativa Índices (`/comparativa`):** Gráficos comparativos.
-5.  **Retroactivo (`/retroactivo`):** Motor de cálculo con 4 Tasas de interés y amortizaciones.
-6.  **Reajustes & Fallos (`/reajustes`):** Implementación de Badaro, Alaniz, Delaude, Elliff, Vergara.
-7.  **Gestión de Clientes (`/clientes`):** CRUD vía localStorage con Expediente Digital, Documentos (Dropzone base64 hasta 2MB), Historial (Línea de tiempo) y Cálculos vinculados. Estrictamente ligado a un historial clínico forzado de estados.
-8.  **Configuración (`/config`):** Datos del Estudio, Valores legales por defecto (PBU, Haber Máximo, Tasa default), Preferencias Visuales (Data Theme: Claro, Oscuro).
+### 3. Módulos Implementados
 
-### 3. Flujo de Trabajo Futuro (Próximos Pasos Pendientes)
-Si volvés a abrir este proyecto, deberías considerar:
-1.  **Backend Real:** Migrar de `localStorage` a **Supabase**. La estructura de `Cliente` y `AppConfig` ya está modelada perfecta para tablas relacionales. Los documentos deberán pasar de Base64 a Supabase Storage S3 buckets.
-2.  **Generación de Reportes PDF:** Implementar `jspdf` y `html2canvas`.
-3.  **Fallos PBU y Autónomos:** Completar motores (Marinati, Vargas, Liechtenstein).
+1.  **Landing Page / Login (`/bienvenido`):** Página pública con precios, registro ("Solicitar Acceso") e inicio de sesión.
+2.  **Panel de Administración (`/admin`):** Solo visible por el rol `admin` (creapp.ar@gmail.com). Permite dar de alta cuentas, asignar planes, registrar pagos, y suspender usuarios morosos.
+3.  **Haber Inicial, Movilidad, Comparativa Índices:** Herramientas de cálculo libres de contexto de estado.
+4.  **Retroactivo:** Motor de liquidación con 4 tasas de interés.
+5.  **Reajustes & Fallos:** Badaro, Alaniz, Delaude, Elliff, Vergara.
+6.  **Gestión de Clientes (Expediente Digital):** CRUD completo. Cada expediente tiene 4 solapas: Expediente, Documentos (Supabase Storage), Historial (línea de tiempo obligatoria) y Cálculos vinculados.
+
+### 4. Estado Actual (Fase de Migración)
+En la última sesión (abril 2026), se configuró toda la arquitectura de Supabase:
+*   Se corrió el `supabase_schema.sql` en la base de datos (tablas, RLS, triggers).
+*   Se crearon las interfaces y el `AuthContext`.
+*   Se construyó el Panel de Administración y la Landing Page.
+
+**PENDIENTE PARA LA PRÓXIMA SESIÓN (FASE 3 Y 5 DEL PLAN):**
+Los módulos internos (Clientes, Configuración) todavía están "cableados" para usar `localStorage` (`src/utils/clientesStore.ts` y `configStore.ts`). 
+El **próximo paso inmediato** es reemplazar esos archivos por integraciones reales con Supabase (`supabaseClientesService.ts`) para que los expedientes se guarden en la nube en lugar del navegador, vinculados al `user_id`. Además, falta migrar la subida de Base64 de documentos hacia los buckets de Supabase Storage.
+
+### 5. Configuración de Entorno
+Para levantar el proyecto, se requiere un `.env.local` con:
+*   `VITE_SUPABASE_URL`
+*   `VITE_SUPABASE_ANON_KEY`
+*   `VITE_ADMIN_EMAIL=creapp.ar@gmail.com`
