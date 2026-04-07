@@ -11,6 +11,7 @@ import { GestionClientes } from './modules/Clientes/GestionClientes';
 import { Configuracion } from './modules/Configuracion/Configuracion';
 import { AdminPanel } from './modules/Admin/AdminPanel';
 import { LandingLogin } from './pages/LandingLogin';
+import { RegistroExitoso } from './pages/RegistroExitoso';
 import { SuspendedAccount } from './pages/SuspendedAccount';
 import './App.css';
 
@@ -58,6 +59,9 @@ function App() {
         {/* Landing/Login — si ya está logueado redirigir al app */}
         <Route path="/bienvenido" element={
           user ? <Navigate to="/" replace /> : <LandingLogin />
+        } />
+        <Route path="/registro-exitoso" element={
+          user ? <Navigate to="/" replace /> : <RegistroExitoso />
         } />
 
         {/* App protegida */}

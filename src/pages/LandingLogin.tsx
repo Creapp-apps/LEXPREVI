@@ -47,7 +47,7 @@ export const LandingLogin = () => {
       if (!nombre.trim()) { setError('Ingresá tu nombre completo.'); setLoading(false); return; }
       const { error } = await signUp(email, password, { nombre_completo: nombre });
       if (error) setError(error);
-      else setSuccess('¡Cuenta creada! Revisá tu email para confirmar el registro. Luego el equipo de LexPrevi activará tu acceso.');
+      else window.location.href = '/registro-exitoso';
     }
     setLoading(false);
   };
