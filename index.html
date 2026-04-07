@@ -12,5 +12,13 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.addEventListener('error', function(e) {
+        document.body.innerHTML += '<div style="color:red; background:white; padding:20px; font-size:20px; z-index:999999; position:absolute; top:0; left:0; right:0;"><h2>Global Error:</h2><pre>' + e.message + '</pre><pre>' + e.filename + ':' + e.lineno + '</pre></div>';
+      });
+      window.addEventListener('unhandledrejection', function(e) {
+        document.body.innerHTML += '<div style="color:red; background:white; padding:20px; font-size:20px; z-index:999999; position:absolute; top:0; left:0; right:0;"><h2>Unhandled Promise Rejection:</h2><pre>' + e.reason + '</pre></div>';
+      });
+    </script>
   </body>
 </html>

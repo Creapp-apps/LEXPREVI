@@ -121,10 +121,14 @@ export const LandingLogin = () => {
               <div className="mock-title">lexprevi.vercel.app/badaro</div>
             </div>
             <div className="mock-body">
-              <div className="mock-sidebar" />
-              <div className="mock-content">
-                <div className="mock-graph" />
-                <div className="mock-details" />
+              <div className="mock-sidebar">
+                <div style={{ padding: '1rem', color: '#64748b', fontSize: '0.75rem', fontWeight: 600 }}>Menú Principal</div>
+                <div style={{ margin: '0.5rem 1rem', padding: '0.5rem', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', borderRadius: '6px', fontSize: '0.8125rem' }}>Calculadora Badaro</div>
+              </div>
+              <div className="mock-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                <Scale size={48} style={{ color: 'rgba(255,255,255,0.1)', marginBottom: '1rem' }} />
+                <h3 style={{ color: '#fff', fontSize: '1.25rem', marginBottom: '0.5rem' }}>Integra una captura real aquí</h3>
+                <p style={{ color: '#64748b', fontSize: '0.875rem', maxWidth: '300px' }}>Este recuadro está diseñado para contener un pantallazo (imagen) de alto impacto del sistema funcionando.</p>
               </div>
             </div>
           </div>
