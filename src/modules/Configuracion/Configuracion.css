@@ -1,0 +1,239 @@
+/* ================================
+   Configuracion.css
+================================ */
+
+.config-view { padding-bottom: 2rem; }
+
+.config-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* Nav lateral */
+.config-nav {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 1rem;
+}
+
+.config-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: none;
+  background: none;
+  border-bottom: 1px solid var(--border-light);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.config-nav-btn:hover { background: var(--bg-surface-hover); }
+
+.config-nav-btn.active { background: var(--brand-light); border-left: 3px solid var(--brand-primary); }
+.config-nav-btn.active .cnb-label { color: var(--brand-primary-hover); }
+
+.cnb-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.config-nav-btn.active .cnb-icon { color: var(--brand-primary); }
+
+.cnb-text { flex: 1; }
+.cnb-label { display: block; font-weight: 600; font-size: 0.875rem; color: var(--text-primary); }
+.cnb-desc  { display: block; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.125rem; }
+.cnb-arrow { color: var(--text-muted); flex-shrink: 0; }
+
+/* Versión info */
+.version-info {
+  padding: 1rem 1.25rem;
+  text-align: center;
+}
+
+.version-logo { font-size: 1.25rem; margin-bottom: 0.25rem; }
+.version-tag  { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
+.version-desc { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.125rem; }
+
+/* Saved button */
+.btn-saved {
+  background: var(--accent-success) !important;
+  pointer-events: none;
+}
+
+/* Field hints */
+.field-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Preview encabezado */
+.preview-card {
+  margin-top: 2rem;
+  border: 1px dashed var(--border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.preview-label {
+  background: var(--bg-surface-hover);
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.preview-body {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-top: 3px solid var(--brand-primary);
+}
+
+.preview-logo     { font-size: 1.75rem; }
+.preview-estudio  { font-size: 1rem; font-weight: 700; color: #1e293b; }
+.preview-resp     { font-size: 0.8125rem; color: #475569; margin-top: 0.125rem; }
+.preview-contact  { font-size: 0.75rem; color: #94a3b8; }
+
+/* Resumen de valores */
+.valores-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.vs-item {
+  background: var(--bg-surface-hover);
+  border-radius: var(--radius-md);
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.vs-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.vs-value { font-size: 0.9375rem; font-weight: 700; color: var(--text-primary); }
+
+/* Tema selector */
+.pref-group { margin-bottom: 2rem; }
+
+.pref-group-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.875rem;
+}
+
+.tema-selector {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.tema-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.tema-btn:hover { border-color: var(--brand-primary); }
+.tema-btn.active { border-color: var(--brand-primary); background: var(--brand-light); color: var(--brand-primary-hover); }
+
+.tema-check {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+  color: var(--brand-primary);
+}
+
+/* Formato selector */
+.formato-selector {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.formato-opt {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.formato-opt.active   { border-color: var(--brand-primary); background: var(--brand-light); }
+.formato-opt input    { accent-color: var(--brand-primary); }
+.formato-opt span:first-of-type  { font-weight: 600; font-size: 0.9375rem; color: var(--text-primary); }
+.formato-ejemplo      { font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
+
+/* Decimales */
+.dec-selector { display: flex; gap: 0.75rem; }
+
+.dec-btn {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-family: ui-monospace, monospace;
+  transition: all 0.2s;
+}
+
+.dec-btn:hover  { border-color: var(--brand-primary); }
+.dec-btn.active { border-color: var(--brand-primary); background: var(--brand-light); color: var(--brand-primary-hover); }
+
+/* Toggle rows dentro de preferencias */
+.pref-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-light);
+  margin-top: 1rem;
+}
+
+.pref-toggle-row {
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+}
+
+.toggle-title { font-weight: 600; font-size: 0.875rem; color: var(--text-primary); margin-bottom: 0.25rem; }
+.toggle-desc  { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }

@@ -1,0 +1,193 @@
+/* ================================================
+   Retroactivo.css
+================================================ */
+
+.retro-view { padding-bottom: 2rem; }
+
+/* Config grid */
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* Tasa radio buttons */
+.tasa-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tasa-option:hover { background: var(--bg-surface-hover); }
+
+.tasa-option.selected {
+  border-color: var(--brand-primary);
+  background: var(--brand-light);
+}
+
+.tasa-option input[type="radio"] {
+  margin-top: 3px;
+  flex-shrink: 0;
+  accent-color: var(--brand-primary);
+}
+
+.tasa-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.tasa-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.tasa-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* Toggle on/off */
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  gap: 1rem;
+}
+
+.toggle-btn {
+  padding: 0.375rem 1rem;
+  border: none;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn.on  { background: var(--accent-success); color: white; }
+.toggle-btn.off { background: var(--bg-surface-hover); color: var(--text-muted); }
+
+/* Pagos */
+.pago-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.pago-date  { width: 150px; flex-shrink: 0; }
+.pago-monto { flex: 0 0 180px; position: relative; }
+.pago-desc  { flex: 1; }
+
+.btn-icon-danger {
+  padding: 0.5rem;
+  background: none;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-icon-danger:hover { background: rgba(239, 68, 68, 0.07); }
+
+.empty-text {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 1rem;
+}
+
+/* Tasa chip en grilla */
+.tasa-chip {
+  color: var(--brand-primary);
+  font-size: 0.875rem;
+}
+
+/* Resultado */
+.resumen-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.resumen-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.resumen-card.highlight-gold {
+  background: linear-gradient(135deg, #1e293b, #1e293b);
+  border-color: #f59e0b;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+}
+
+.resumen-card.highlight-gold .res-label,
+.resumen-card.highlight-gold .res-value { color: #fcd34d; }
+
+.resumen-card.highlight-green {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.resumen-card.highlight-red {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.res-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.res-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.res-value.large { font-size: 1.5rem; }
+
+.res-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Tabla */
+.text-danger-cell { color: var(--accent-danger); font-weight: 600; }
+.text-brand       { color: var(--brand-primary); }
+
+.row-total {
+  background: var(--bg-surface-hover);
+  border-top: 2px solid var(--border-light);
+}
+
+.row-total td {
+  font-weight: 700 !important;
+  font-size: 0.875rem;
+}

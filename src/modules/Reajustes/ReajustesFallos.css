@@ -1,0 +1,319 @@
+/* ====================================================
+   ReajustesFallos.css
+==================================================== */
+
+.reajustes-view { padding-bottom: 2rem; }
+
+/* Filtro de categorías */
+.cat-filter {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.cat-btn {
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--border-light);
+  background: var(--bg-surface);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cat-btn:hover  { background: var(--bg-surface-hover); color: var(--text-primary); }
+.cat-btn.active { background: var(--brand-primary); border-color: var(--brand-primary); color: white; }
+
+/* Grid de tarjetas de fallos */
+.fallos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.fallo-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--fallo-color, var(--brand-primary));
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.fallo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--fallo-color, var(--brand-primary));
+}
+
+.fallo-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fallo-badge {
+  display: inline-block;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fallo-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+
+.fallo-tribunal {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.fallo-anio {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.fallo-nombre {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.fallo-desc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  flex: 1;
+  margin: 0;
+}
+
+.fallo-ref {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.fallo-cta {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fallo-color, var(--brand-primary));
+  margin-top: auto;
+}
+
+/* ===== Panel interior de cada fallo ===== */
+.fallo-detail-header {
+  border-left: 6px solid;
+  padding-left: 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: none;
+  border: none;
+  color: var(--brand-primary);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.btn-back:hover { opacity: 0.75; }
+
+.fallo-detail-info { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.fallo-badge-lg {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.25rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.fallo-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 0.2rem 0.625rem;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.chip.tribunal { background: rgba(59,130,246,0.1); color: #3b82f6; }
+.chip.anio     { background: var(--bg-surface-hover); color: var(--text-secondary); }
+.chip.ref      { background: rgba(16,185,129,0.1); color: #059669; }
+
+/* Descripción jurídica */
+.fallo-juridico {
+  display: flex;
+  gap: 1rem;
+  background: var(--bg-surface-hover);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  align-items: flex-start;
+}
+
+.fallo-juridico-icon { flex-shrink: 0; margin-top: 2px; }
+.fallo-juridico-title { font-size: 0.9375rem; display: block; margin-bottom: 0.375rem; }
+.fallo-juridico-detalle {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Layout de calculadoras */
+.calc-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* Resultado highlight */
+.resultado-highlight {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-left: 6px solid;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.25rem;
+}
+
+.rh-label { font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+.rh-value { font-size: 2rem; font-weight: 700; margin-bottom: 0.375rem; }
+.rh-sub   { font-size: 0.8125rem; color: var(--text-muted); }
+
+/* Comparación ANSES vs Fallo */
+.comp-dos-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.comp-col {
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  background: var(--bg-surface);
+}
+
+.comp-col.fallo { border-width: 2px; }
+
+.comp-col-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.375rem; }
+.comp-col-value { font-size: 1.375rem; font-weight: 700; color: var(--text-primary); }
+.comp-col-pct   { font-size: 0.875rem; font-weight: 600; color: var(--text-muted); margin-top: 0.25rem; }
+
+/* Pasos Delaude */
+.paso-delaude {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.paso-info { flex: 1; display: flex; flex-direction: column; }
+.paso-mes  { font-weight: 600; font-size: 0.875rem; }
+.paso-pct  { font-size: 0.8125rem; color: var(--accent-success); font-weight: 500; }
+.paso-haber { font-weight: 700; font-size: 0.9375rem; }
+
+/* RIPTE chips */
+.ripte-chips {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ripte-chip {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 0.875rem 1.25rem;
+  flex: 1;
+  text-align: center;
+}
+
+.rc-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+.rc-value { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+
+/* Vergara breakdown */
+.vergara-breakdown {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.vb-item {
+  flex: 1;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid;
+}
+
+.vb-item.blue  { background: rgba(59,130,246,0.07); border-color: rgba(59,130,246,0.2); }
+.vb-item.green { background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.2); }
+
+.vb-label { font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.375rem; }
+.vb-value { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+.vb-plus  { font-size: 1.75rem; font-weight: 300; color: var(--text-muted); }
+
+/* Coming soon */
+.coming-soon-calc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.coming-soon-calc h3 { font-size: 1rem; color: var(--text-primary); }
+.coming-soon-calc p  { font-size: 0.8125rem; line-height: 1.6; max-width: 280px; }
+
+/* Componente selector */
+.selector-view { padding-bottom: 1rem; }
+.panel-fallo   { padding-bottom: 2rem; }
+.resultados-panel { display: flex; flex-direction: column; gap: 1rem; }
+.comp-chart    { margin-top: 0; }
