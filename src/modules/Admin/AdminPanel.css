@@ -1,0 +1,180 @@
+/* ================================
+   AdminPanel.css
+================================ */
+
+.admin-panel { padding-bottom: 2rem; }
+
+/* Stats */
+.admin-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-stat {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 1.125rem 1.25rem;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.as-icon {
+  width: 44px; height: 44px;
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.as-val   { font-size: 1.625rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+.as-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* Tabla */
+.admin-table-wrap { overflow: hidden; }
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 0.875rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-light);
+  background: var(--bg-surface-hover);
+}
+
+.admin-table td {
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:last-child td { border-bottom: none; }
+.admin-table tbody tr:hover td { background: var(--bg-surface-hover); }
+.row-inactive { opacity: 0.55; }
+
+/* User cell */
+.user-cell { display: flex; align-items: center; gap: 0.75rem; }
+.uc-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-primary), #6366f1);
+  color: white; font-weight: 700; font-size: 0.8125rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.uc-nombre  { font-weight: 600; font-size: 0.875rem; color: var(--text-primary); }
+.uc-estudio { font-size: 0.75rem; color: var(--text-muted); }
+
+.td-email { color: var(--text-secondary); font-size: 0.8125rem; }
+.td-fecha { font-size: 0.8125rem; color: var(--text-secondary); }
+
+.plan-chip {
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--brand-light);
+  color: var(--brand-primary-hover);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-edit-user {
+  display: flex; align-items: center; gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  background: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-edit-user:hover { border-color: var(--brand-primary); color: var(--brand-primary); background: var(--brand-light); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1rem;
+  overflow-y: auto;
+  backdrop-filter: blur(4px);
+}
+
+.modal-body {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 640px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+}
+.modal-header h2 { font-size: 1.0625rem; margin: 0; }
+
+.btn-icon-sm {
+  background: none; border: none; color: var(--text-muted);
+  cursor: pointer; padding: 0.25rem; border-radius: 4px;
+  display: flex; align-items: center; transition: background 0.15s;
+}
+.btn-icon-sm:hover { background: var(--bg-surface-hover); }
+
+.modal-content { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+.modal-section {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.modal-section-title {
+  padding: 0.625rem 1rem;
+  background: var(--bg-surface-hover);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
