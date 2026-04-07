@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Scale, Mail, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, Users, Shield, FileText } from 'lucide-react';
+import { Scale, Mail, Lock, Eye, EyeOff, ArrowRight, CheckCircle2, Users, Shield, FileText, ChevronRight, Calculator, Clock, Check, X } from 'lucide-react';
 import './LandingLogin.css';
 
 type Mode = 'login' | 'register';
@@ -8,36 +8,55 @@ type Mode = 'login' | 'register';
 const PLANES = [
   {
     nombre: 'Starter',
-    precio: '$200 / año',
-    limit: 'Hasta 50 expedientes',
+    precio: '$200',
+    periodo: '/ año',
+    limit: 'Límite de 50 expedientes activos',
     color: '#3b82f6',
-    items: ['Todos los módulos incluidos', 'Historial y documentos', 'Reajustes jurisprudenciales', 'Soporte por email'],
+    items: ['Liquidación Badaro, Elliff, etc.', 'Gestión de clientes en Nube', 'Cálculo de Retroactivos', 'Soporte vía Email'],
   },
   {
     nombre: 'Enterprise',
-    precio: 'A convenir',
+    precio: 'Personalizado',
+    periodo: '',
     limit: 'Expedientes ilimitados',
-    color: '#8b5cf6',
-    badge: 'Estudios Jurídicos',
-    items: ['Todo lo de Starter', 'Múltiples usuarios', 'Prioridad en soporte', 'Capacitación incluida'],
+    color: '#a855f7',
+    badge: 'ESTUDIOS GRANDES',
+    items: ['Todo lo del plan Starter', 'Múltiples usuarios por firma', 'Prioridad de soporte Alta', 'Capacitación al personal'],
   },
 ];
 
 export const LandingLogin = () => {
   const { signIn, signUp } = useAuth();
-  const [mode, setMode]       = useState<Mode>('login');
-  const [email, setEmail]     = useState('');
-  const [password, setPassword] = useState('');
-  const [nombre, setNombre]   = useState('');
-  const [showPwd, setShowPwd] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
-  const [success, setSuccess] = useState('');
+  
+  // Modal State
+  const [modalOpen, setModalOpen] = useState(false);
+  const [mode, setMode]           = useState<Mode>('login');
+  
+  // Auth Form State
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
+  const [nombre, setNombre]       = useState('');
+  const [showPwd, setShowPwd]     = useState(false);
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState('');
+
+  // Prevenir scroll en body al abrir modal
+  useEffect(() => {
+    if (modalOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [modalOpen]);
+
+  const openAuth = (m: Mode) => {
+    setMode(m);
+    setError('');
+    // Reseteamos el success se manejara por redireccion
+    setModalOpen(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     setLoading(true);
 
     if (mode === 'login') {
@@ -53,144 +72,199 @@ export const LandingLogin = () => {
   };
 
   return (
-    <div className="landing">
-      {/* ── NAV ── */}
-      <nav className="landing-nav">
-        <div className="ln-brand">
-          <Scale size={28} className="ln-icon" />
-          <span>LexPrevi <span className="ln-badge">PRO</span></span>
-        </div>
-        <div className="ln-actions">
-          <button className={`ln-tab ${mode === 'login' ? 'active' : ''}`} onClick={() => setMode('login')}>Iniciar Sesión</button>
-          <button className="btn-outline-sm" onClick={() => setMode('register')}>Solicitar Acceso</button>
+    <div className="landing-premium">
+      {/* ── BACKGROUND GLOWS ── */}
+      <div className="ambient-glow glow-1" />
+      <div className="ambient-glow glow-2" />
+
+      {/* ── NAV OVERLAY ── */}
+      <nav className="nav-glass">
+        <div className="nav-container">
+          <div className="brand">
+            <Scale size={26} className="brand-icon" />
+            <span className="brand-text">LexPrevi <span className="brand-badge">PRO</span></span>
+          </div>
+          <div className="nav-actions">
+            <button className="nav-link" onClick={() => openAuth('login')}>Iniciar sesión</button>
+            <button className="btn-apple-primary" onClick={() => openAuth('register')}>Solicitar Acceso</button>
+          </div>
         </div>
       </nav>
 
-      <div className="landing-body">
-        {/* ── HERO ── */}
-        <section className="hero">
-          <div className="hero-content">
-            <div className="hero-chip">⚖️ Plataforma Previsional Argentina</div>
-            <h1 className="hero-title">
-              Calculá, liquidá y gestioná<br />
-              <span className="hero-gradient">expedientes previsionales</span><br />
-              como nunca antes.
-            </h1>
-            <p className="hero-sub">
-              LexPrevi reúne todos los cálculos del fuero previsional argentino en una sola plataforma profesional.
-              Badaro, Alaniz, Elliff, retroactivos, movilidades y más — en segundos.
-            </p>
-            <div className="hero-features">
-              {[
-                { icon: <Scale size={18} />, label: '8 Fallos Jurisprudenciales' },
-                { icon: <FileText size={18} />, label: 'Liquidación de Retroactivos' },
-                { icon: <Users size={18} />, label: 'Gestión de Expedientes' },
-                { icon: <Shield size={18} />, label: 'Datos seguros en la nube' },
-              ].map(f => (
-                <div key={f.label} className="hf-item">
-                  {f.icon} <span>{f.label}</span>
-                </div>
-              ))}
+      {/* ── HERO CENTRADO ── */}
+      <section className="hero-section center-layout">
+        <div className="hero-badge animate-float">
+          <span>Actualizado DNU 274/24</span> <ChevronRight size={14} />
+        </div>
+        
+        <h1 className="hero-title reveal-text">
+          El motor de cálculo previsional<br />
+          más exacto, en la nube.
+        </h1>
+        
+        <p className="hero-subtitle reveal-text delay-1">
+          LexPrevi unifica movilidad, haber inicial y reajustes jurisprudenciales en un ecosistema hermoso, privado y de nivel corporativo para estudios jurídicos.
+        </p>
+        
+        <div className="hero-cta reveal-text delay-2">
+          <button className="btn-apple-large" onClick={() => openAuth('register')}>
+            Comenzar Prueba <ArrowRight size={18} />
+          </button>
+        </div>
+
+        {/* MOCKUP FLOTANTE */}
+        <div className="hero-mockup-wrap reveal-up delay-3">
+          <div className="hero-mockup-glass">
+            {/* Si alguna vez exportamos un img, iría aquí. Mientras usamos una UI abstracta. */}
+            <div className="mock-header">
+              <div className="mock-dots"><span/><span/><span/></div>
+              <div className="mock-title">lexprevi.vercel.app/badaro</div>
+            </div>
+            <div className="mock-body">
+              <div className="mock-sidebar" />
+              <div className="mock-content">
+                <div className="mock-graph" />
+                <div className="mock-details" />
+              </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* ── FORM ── */}
-          <div className="auth-card">
-            <div className="auth-tabs">
-              <button className={`auth-tab ${mode === 'login' ? 'active' : ''}`} onClick={() => { setMode('login'); setError(''); setSuccess(''); }}>
-                Iniciar Sesión
-              </button>
-              <button className={`auth-tab ${mode === 'register' ? 'active' : ''}`} onClick={() => { setMode('register'); setError(''); setSuccess(''); }}>
-                Registrarse
+      {/* ── BENTO BOX FEATURES ── */}
+      <section className="bento-section">
+        <div className="bento-container">
+          <div className="bento-header">
+            <h2>Diseñado para abogados que detestan perder el tiempo.</h2>
+            <p>Todo el fuero de seguridad social corriendo nativamente a la velocidad de la luz.</p>
+          </div>
+
+          <div className="bento-grid">
+            {/* Box 1 - Grande */}
+            <div className="bento-box bento-large flex-col">
+              <Calculator size={40} className="bento-icon text-blue" />
+              <h3>Liquidación Ultra-Rápida</h3>
+              <p>Badaro, Alaniz, Elliff, PBU, Movilidades recientes. Ingresa las rentas, selecciona el fallo, y obtén el haber resultante con topes confiscatorios calculados al centavo al instante.</p>
+            </div>
+            {/* Box 2 */}
+            <div className="bento-box flex-col">
+              <Shield size={34} className="bento-icon text-purple" />
+              <h3>Aislamiento Multi-Tenant</h3>
+              <p>Seguridad nivel banco. Tus expedientes y documentos viven en contenedores asilados criptográficamente.</p>
+            </div>
+            {/* Box 3 */}
+            <div className="bento-box flex-col justify-end text-right" style={{ background: 'linear-gradient(to top right, rgba(59,130,246,0.1), transparent)' }}>
+              <Users size={34} className="bento-icon text-cyan mb-auto ml-auto" />
+              <h3>Gestión de Cartera</h3>
+              <p>Control de estados, historial clínico por cliente e indexación inteligente.</p>
+            </div>
+            {/* Box 4 */}
+            <div className="bento-box bento-wide flex-row items-center gap-6">
+              <div style={{ flex: 1 }}>
+                <h3>Documentos en la Nube</h3>
+                <p>Abandona los pendrives. Sube el PDF de Anses directamente a la ficha del cliente y visualízalo estés donde estés.</p>
+              </div>
+              <FileText size={80} style={{ opacity: 0.1, color: '#f8fafc' }} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PRICING APPLE-STYLE ── */}
+      <section className="pricing-section">
+        <h2 className="pricing-title">Profesionalidad a tu alcance.</h2>
+        <div className="pricing-grid">
+          {PLANES.map(p => (
+            <div key={p.nombre} className="apple-pricing-card">
+              {p.badge && <div className="ap-badge" style={{ color: p.color }}>{p.badge}</div>}
+              <h3 className="ap-name">{p.nombre}</h3>
+              <div className="ap-price-wrap">
+                <span className="ap-price">{p.precio}</span>
+                <span className="ap-period">{p.periodo}</span>
+              </div>
+              <p className="ap-limit">{p.limit}</p>
+              <ul className="ap-features">
+                {p.items.map(i => (
+                  <li key={i}><Check size={16} color={p.color} /> {i}</li>
+                ))}
+              </ul>
+              <button className="btn-apple-outline" onClick={() => openAuth('register')} style={{ borderColor: p.color, color: p.color }}>
+                Comenzar con {p.nombre}
               </button>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <form className="auth-form" onSubmit={handleSubmit}>
+      {/* ── FOOTER ── */}
+      <footer className="footer-minimal">
+        <div className="flex-center gap-2 mb-2">
+          <Scale size={20} className="text-blue" />
+          <span style={{ fontWeight: 600 }}>LexPrevi PRO</span>
+        </div>
+        <p className="footer-txt">Ingeniería Web para el sector legal previsional.</p>
+        <p className="footer-copy">© 2026 CreApp Studios.</p>
+      </footer>
+
+      {/* ── MODAL AUTHENTICATION (GLASS PORTAL) ── */}
+      {modalOpen && (
+        <div className="glass-modal-overlay animate-in" onClick={() => setModalOpen(false)}>
+          <div className="glass-modal animate-scale" onClick={e => e.stopPropagation()}>
+            <button className="glass-close" onClick={() => setModalOpen(false)}><X size={20} /></button>
+            
+            <div className="gm-header">
+              <Scale size={32} className="gm-icon" />
+              <h2>{mode === 'login' ? 'Iniciar Sesión' : 'Crea tu cuenta'}</h2>
+              <p>{mode === 'login' ? 'Accede a tu panel en la nube.' : 'Solicita acceso al sistema maestro.'}</p>
+            </div>
+
+            <form className="gm-form" onSubmit={handleSubmit}>
+              <div className="auth-tabs">
+                <button type="button" className={`at-tab ${mode==='login' ? 'active' : ''}`} onClick={()=>setMode('login')}>Ingresar</button>
+                <button type="button" className={`at-tab ${mode==='register' ? 'active' : ''}`} onClick={()=>setMode('register')}>Solicitar</button>
+              </div>
+
               {mode === 'register' && (
-                <div className="auth-field">
-                  <label>Nombre Completo</label>
-                  <div className="input-wrap">
-                    <Users size={16} className="input-icon" />
-                    <input type="text" placeholder="Dr. Juan Pérez" value={nombre}
-                      onChange={e => setNombre(e.target.value)} required />
+                <div className="gm-field">
+                  <div className="gm-input-glass">
+                    <Users size={18} className="gm-i" />
+                    <input autoFocus type="text" placeholder="Tu Nombre o Estudio" value={nombre} onChange={e => setNombre(e.target.value)} required />
                   </div>
                 </div>
               )}
 
-              <div className="auth-field">
-                <label>Email Profesional</label>
-                <div className="input-wrap">
-                  <Mail size={16} className="input-icon" />
-                  <input type="email" placeholder="dr.perez@estudio.com.ar" value={email}
-                    onChange={e => setEmail(e.target.value)} required />
+              <div className="gm-field">
+                <div className="gm-input-glass">
+                  <Mail size={18} className="gm-i" />
+                  <input autoFocus={mode === 'login'} type="email" placeholder="Email profesional" value={email} onChange={e => setEmail(e.target.value)} required />
                 </div>
               </div>
 
-              <div className="auth-field">
-                <label>{mode === 'login' ? 'Contraseña' : 'Crear Contraseña'}</label>
-                <div className="input-wrap">
-                  <Lock size={16} className="input-icon" />
-                  <input type={showPwd ? 'text' : 'password'} placeholder="••••••••" value={password}
-                    onChange={e => setPassword(e.target.value)} required minLength={6} />
-                  <button type="button" className="input-toggle" onClick={() => setShowPwd(p => !p)}>
-                    {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
+              <div className="gm-field">
+                <div className="gm-input-glass">
+                  <Lock size={18} className="gm-i" />
+                  <input type={showPwd ? 'text' : 'password'} placeholder="Contraseña segura" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} />
+                  <button type="button" className="gm-btn-icon" onClick={() => setShowPwd(!showPwd)}>
+                    {showPwd ? <EyeOff size={18}/> : <Eye size={18}/>}
                   </button>
                 </div>
               </div>
 
-              {error   && <div className="auth-error">{error}</div>}
-              {success && (
-                <div className="auth-success">
-                  <CheckCircle2 size={15} /> {success}
-                </div>
-              )}
+              {error && <div className="gm-error">{error}</div>}
 
-              {!success && (
-                <button type="submit" className="btn-auth" disabled={loading}>
-                  {loading ? <span className="spin-sm" /> : <ArrowRight size={18} />}
-                  {mode === 'login' ? 'Ingresar a LexPrevi' : 'Solicitar Acceso'}
-                </button>
-              )}
+              <button type="submit" className="btn-apple-primary w-full mt-4" disabled={loading}>
+                {loading ? <span className="spin-minimal"/> : (mode === 'login' ? 'Entrar a LexPrevi' : 'Continuar Seguro')}
+              </button>
 
-              {mode === 'register' && !success && (
-                <p className="auth-note">
-                  Tu solicitud será revisada y activada manualmente por el equipo de LexPrevi. Recibirás un email de confirmación.
+              {mode === 'register' && (
+                <p className="gm-disclaimer">
+                  Tu solicitud se enviará a revisión. Estarás confirmando las Condiciones de Uso Privadas de la plataforma.
                 </p>
               )}
             </form>
           </div>
-        </section>
-
-        {/* ── PLANES ── */}
-        <section className="planes-section" id="planes">
-          <h2 className="section-title">Planes y Precios</h2>
-          <p className="section-sub">Todos los planes incluyen acceso completo a todos los módulos. La diferencia es la escala.</p>
-          <div className="planes-grid">
-            {PLANES.map(p => (
-              <div key={p.nombre} className="plan-card" style={{ borderTopColor: p.color }}>
-                {p.badge && <div className="plan-badge" style={{ background: p.color }}>{p.badge}</div>}
-                <div className="plan-nombre" style={{ color: p.color }}>{p.nombre}</div>
-                <div className="plan-precio">{p.precio}</div>
-                <div className="plan-limit">{p.limit}</div>
-                <ul className="plan-items">
-                  {p.items.map(i => <li key={i}><CheckCircle2 size={14} style={{ color: p.color }} /> {i}</li>)}
-                </ul>
-                <button className="btn-plan" style={{ background: p.color }}
-                  onClick={() => setMode('register')}>
-                  Comenzar ahora
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── FOOTER ── */}
-        <footer className="landing-footer">
-          <div className="lf-brand"><Scale size={20} /> LexPrevi PRO</div>
-          <p>Desarrollado por <strong>CreApp</strong> · Plataforma Previsional Argentina</p>
-          <p>contacto: creapp.ar@gmail.com</p>
-        </footer>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
