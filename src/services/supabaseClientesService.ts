@@ -68,16 +68,16 @@ export const supabaseClientesService = {
     const { data: inserted, error } = await supabase.from('clientes').insert({
       user_id: userId,
       apellido_nombre: data.apellidoNombre,
-      cuil: data.cuil,
-      dni: data.dni,
-      email: data.email,
-      telefono: data.telefono,
-      fecha_nacimiento: data.fechaNacimiento,
-      sexo: data.sexo,
-      nro_expediente: data.nroExpediente,
-      juzgado: data.juzgado,
-      estado: data.estado,
-      notas: data.notas,
+      cuil: data.cuil || null,
+      dni: data.dni || null,
+      email: data.email || null,
+      telefono: data.telefono || null,
+      fecha_nacimiento: data.fechaNacimiento || null,
+      sexo: data.sexo || null,
+      nro_expediente: data.nroExpediente || null,
+      juzgado: data.juzgado || null,
+      estado: data.estado || 'activo',
+      notas: data.notas || null,
     }).select('id').single();
 
     if (error) throw error;
@@ -86,8 +86,8 @@ export const supabaseClientesService = {
     await supabase.from('historial_estados').insert({
       cliente_id: inserted.id,
       user_id: userId,
-      estado_anterior: data.estado,
-      estado_nuevo: data.estado,
+      estado_anterior: data.estado || 'activo',
+      estado_nuevo: data.estado || 'activo',
       notas: 'Alta del expediente.',
       autor: 'Sistema',
     });
@@ -98,16 +98,16 @@ export const supabaseClientesService = {
   async updateCliente(userId: string, clienteId: string, data: Partial<Cliente>) {
     const { error } = await supabase.from('clientes').update({
       apellido_nombre: data.apellidoNombre,
-      cuil: data.cuil,
-      dni: data.dni,
-      email: data.email,
-      telefono: data.telefono,
-      fecha_nacimiento: data.fechaNacimiento,
-      sexo: data.sexo,
-      nro_expediente: data.nroExpediente,
-      juzgado: data.juzgado,
+      cuil: data.cuil || null,
+      dni: data.dni || null,
+      email: data.email || null,
+      telefono: data.telefono || null,
+      fecha_nacimiento: data.fechaNacimiento || null,
+      sexo: data.sexo || null,
+      nro_expediente: data.nroExpediente || null,
+      juzgado: data.juzgado || null,
       estado: data.estado,
-      notas: data.notas,
+      notas: data.notas || null,
       updated_at: new Date().toISOString()
     }).eq('id', clienteId).eq('user_id', userId);
 

@@ -415,6 +415,8 @@ const FormCliente: React.FC<{
     setLoading(true);
     try {
       await onSave(form as any);
+    } catch (e: any) {
+      alert('Error guardando cliente: ' + (e.message || 'Verificá los datos ingresados.'));
     } finally {
       setLoading(false);
     }
