@@ -11,17 +11,17 @@ const PLANES = [
     precio: '$200',
     periodo: '/ año',
     limit: 'Límite de 50 expedientes activos',
-    color: '#3b82f6',
-    items: ['Liquidación Badaro, Elliff, etc.', 'Gestión de clientes en Nube', 'Cálculo de Retroactivos', 'Soporte vía Email'],
+    color: '#94a3b8',
+    items: ['Liquidación Badaro, Elliff, etc.', 'Gestión de clientes en Nube', 'Cálculo de Retroactivos', 'Soporte prioritario'],
   },
   {
     nombre: 'Enterprise',
     precio: 'Personalizado',
     periodo: '',
     limit: 'Expedientes ilimitados',
-    color: '#a855f7',
+    color: '#f8fafc',
     badge: 'ESTUDIOS GRANDES',
-    items: ['Todo lo del plan Starter', 'Múltiples usuarios por firma', 'Prioridad de soporte Alta', 'Capacitación al personal'],
+    items: ['Todo lo del plan Starter', 'Múltiples usuarios por firma', 'Prioridad de soporte Alta', 'Ingeniería dedicada'],
   },
 ];
 
@@ -61,9 +61,9 @@ export const LandingLogin = () => {
 
     if (mode === 'login') {
       const { error } = await signIn(email, password);
-      if (error) setError('Email o contraseña incorrectos.');
+      if (error) setError('Credenciales incorrectas.');
     } else {
-      if (!nombre.trim()) { setError('Ingresá tu nombre completo.'); setLoading(false); return; }
+      if (!nombre.trim()) { setError('Requiere nombre completo.'); setLoading(false); return; }
       const { error } = await signUp(email, password, { nombre_completo: nombre });
       if (error) setError(error);
       else window.location.href = '/registro-exitoso';
@@ -81,12 +81,12 @@ export const LandingLogin = () => {
       <nav className="nav-glass">
         <div className="nav-container">
           <div className="brand">
-            <Scale size={26} className="brand-icon" />
+            <Scale size={24} className="brand-icon" />
             <span className="brand-text">LexPrevi <span className="brand-badge">PRO</span></span>
           </div>
           <div className="nav-actions">
-            <button className="nav-link" onClick={() => openAuth('login')}>Iniciar sesión</button>
-            <button className="btn-apple-primary" onClick={() => openAuth('register')}>Solicitar Acceso</button>
+            <button className="nav-link" onClick={() => openAuth('login')}>Iniciar Sesión</button>
+            <button className="btn-apple-primary" onClick={() => openAuth('register')}>Registrarse</button>
           </div>
         </div>
       </nav>
@@ -94,34 +94,33 @@ export const LandingLogin = () => {
       {/* ── HERO CENTRADO ── */}
       <section className="hero-section center-layout">
         <div className="hero-badge animate-float">
-          <span>Actualizado DNU 274/24</span> <ChevronRight size={14} />
+          <span style={{ letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.7rem' }}>Actualizado DNU 274/24</span>
         </div>
         
         <h1 className="hero-title reveal-text">
           El motor de cálculo previsional<br />
-          más exacto, en la nube.
+          más exacto y seguro.
         </h1>
         
         <p className="hero-subtitle reveal-text delay-1">
-          LexPrevi unifica movilidad, haber inicial y reajustes jurisprudenciales en un ecosistema hermoso, privado y de nivel corporativo para estudios jurídicos.
+          Unificamos movilidad, haber inicial y reajustes jurisprudenciales en una arquitectura en la nube de alta precisión, diseñada bajo estándares de grado corporativo.
         </p>
         
         <div className="hero-cta reveal-text delay-2">
           <button className="btn-apple-large" onClick={() => openAuth('register')}>
-            Comenzar Prueba <ArrowRight size={18} />
+            Comenzar Prueba
           </button>
         </div>
 
         {/* MOCKUP FLOTANTE */}
         <div className="hero-mockup-wrap reveal-up delay-3">
           <div className="hero-mockup-glass">
-            {/* Si alguna vez exportamos un img, iría aquí. Mientras usamos una UI abstracta. */}
             <div className="mock-header">
               <div className="mock-dots"><span/><span/><span/></div>
-              <div className="mock-title">lexprevi.vercel.app/badaro</div>
+              <div className="mock-title">Entorno Seguro — LexPrevi</div>
             </div>
             <div className="mock-body" style={{ padding: 0 }}>
-              <img src="/app-showcase.webp" alt="LexPrevi Plataforma Demo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/app-showcase.webp" alt="LexPrevi Plataforma Demo" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }} />
             </div>
           </div>
         </div>
@@ -131,36 +130,36 @@ export const LandingLogin = () => {
       <section className="bento-section">
         <div className="bento-container">
           <div className="bento-header">
-            <h2>Diseñado para abogados que detestan perder el tiempo.</h2>
-            <p>Todo el fuero de seguridad social corriendo nativamente a la velocidad de la luz.</p>
+            <h2>Ingeniería Legal. Cero latencia.</h2>
+            <p>Todo el fuero de seguridad social procesado nativamente por algoritmos verificados.</p>
           </div>
 
           <div className="bento-grid">
             {/* Box 1 - Grande */}
             <div className="bento-box bento-large flex-col">
-              <Calculator size={40} className="bento-icon text-blue" />
-              <h3>Liquidación Ultra-Rápida</h3>
-              <p>Badaro, Alaniz, Elliff, PBU, Movilidades recientes. Ingresa las rentas, selecciona el fallo, y obtén el haber resultante con topes confiscatorios calculados al centavo al instante.</p>
+              <Calculator size={34} className="bento-icon text-platinum" />
+              <h3>Liquidación Paramétrica</h3>
+              <p>Badaro, Alaniz, Elliff, PBU, movilidades recientes. Ingrese las rentas, seleccione el fallo correspondiente y obtenga el haber resultante con topes confiscatorios calculados al centavo de forma instantánea.</p>
             </div>
             {/* Box 2 */}
             <div className="bento-box flex-col">
-              <Shield size={34} className="bento-icon text-purple" />
-              <h3>Aislamiento Multi-Tenant</h3>
-              <p>Seguridad nivel banco. Tus expedientes y documentos viven en contenedores asilados criptográficamente.</p>
+              <Shield size={34} className="bento-icon text-platinum" />
+              <h3>Infraestructura Aislada</h3>
+              <p>Protocolos de seguridad bancaria. Sus expedientes y documentos persisten en tenencias encriptadas e impenetrables.</p>
             </div>
             {/* Box 3 */}
-            <div className="bento-box flex-col justify-end text-right" style={{ background: 'linear-gradient(to top right, rgba(59,130,246,0.1), transparent)' }}>
-              <Users size={34} className="bento-icon text-cyan mb-auto ml-auto" />
-              <h3>Gestión de Cartera</h3>
-              <p>Control de estados, historial clínico por cliente e indexación inteligente.</p>
+            <div className="bento-box flex-col justify-end text-right" style={{ background: 'linear-gradient(to top right, rgba(255,255,255,0.03), transparent)' }}>
+              <Users size={34} className="bento-icon text-platinum mb-auto ml-auto" />
+              <h3>Gestión Analítica</h3>
+              <p>Auditoría de estados procesales, métricas e indexación algorítmica.</p>
             </div>
             {/* Box 4 */}
             <div className="bento-box bento-wide flex-row items-center gap-6">
               <div style={{ flex: 1 }}>
-                <h3>Documentos en la Nube</h3>
-                <p>Abandona los pendrives. Sube el PDF de Anses directamente a la ficha del cliente y visualízalo estés donde estés.</p>
+                <h3>Documentos Centralizados</h3>
+                <p>Prescinda del almacenamiento físico local. Adjunte dictámenes directos de ANSES a la ficha electrónica, disponibles globalmente con latencia cero.</p>
               </div>
-              <FileText size={80} style={{ opacity: 0.1, color: '#f8fafc' }} />
+              <FileText size={70} style={{ opacity: 0.05, color: '#f8fafc' }} />
             </div>
           </div>
         </div>
@@ -168,11 +167,11 @@ export const LandingLogin = () => {
 
       {/* ── PRICING APPLE-STYLE ── */}
       <section className="pricing-section">
-        <h2 className="pricing-title">Profesionalidad a tu alcance.</h2>
+        <h2 className="pricing-title">Planes Corporativos.</h2>
         <div className="pricing-grid">
           {PLANES.map(p => (
             <div key={p.nombre} className="apple-pricing-card">
-              {p.badge && <div className="ap-badge" style={{ color: p.color }}>{p.badge}</div>}
+              {p.badge && <div className="ap-badge" style={{ color: p.color, borderColor: p.color }}>{p.badge}</div>}
               <h3 className="ap-name">{p.nombre}</h3>
               <div className="ap-price-wrap">
                 <span className="ap-price">{p.precio}</span>
@@ -181,11 +180,11 @@ export const LandingLogin = () => {
               <p className="ap-limit">{p.limit}</p>
               <ul className="ap-features">
                 {p.items.map(i => (
-                  <li key={i}><Check size={16} color={p.color} /> {i}</li>
+                  <li key={i}><Check size={16} color={p.color} style={{ opacity: 0.7 }} /> {i}</li>
                 ))}
               </ul>
               <button className="btn-apple-outline" onClick={() => openAuth('register')} style={{ borderColor: p.color, color: p.color }}>
-                Comenzar con {p.nombre}
+                Comenzar Prueba
               </button>
             </div>
           ))}
@@ -195,10 +194,10 @@ export const LandingLogin = () => {
       {/* ── FOOTER ── */}
       <footer className="footer-minimal">
         <div className="flex-center gap-2 mb-2">
-          <Scale size={20} className="text-blue" />
-          <span style={{ fontWeight: 600 }}>LexPrevi PRO</span>
+          <Scale size={18} className="text-platinum" style={{ opacity: 0.8 }} />
+          <span style={{ fontWeight: 600, letterSpacing: '0.05em' }}>LexPrevi PRO</span>
         </div>
-        <p className="footer-txt">Ingeniería Web para el sector legal previsional.</p>
+        <p className="footer-txt">Ingeniería en tecnología legal previsional.</p>
         <p className="footer-copy">© 2026 CreApp Studios.</p>
       </footer>
 
